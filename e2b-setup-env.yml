@@ -550,7 +550,7 @@ Resources:
     Properties:
       InstanceType: !If
         - IsX64
-        - c7i.xlarge
+        - t3.medium
         - c7g.xlarge
       KeyName: !Ref KeyName
       IamInstanceProfile: !Ref EC2InstanceProfile

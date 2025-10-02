@@ -1,6 +1,6 @@
 FROM golang:1.24-alpine3.20 AS builder
 
-RUN apk add --no-cache make
+RUN apk add --no-cache make git
 
 WORKDIR /build/shared
 
