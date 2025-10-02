@@ -1,5 +1,6 @@
 FROM golang:1.24-alpine3.20 AS builder
 
+ARG COMMIT_SHA
 RUN apk add --no-cache make git
 
 # Shared
@@ -26,8 +27,9 @@ RUN go mod download
 
 COPY internal internal
 COPY main.go main.go
+COPY .git .git
 
-RUN --mount=type=cache,target=/root/.cache/go-build make build
+RUN --mount=type=cache,target=/root/.cache/go-build make build COMMIT_SHA=${COMMIT_SHA}
 
 RUN chmod +x /build/api/bin/api
 

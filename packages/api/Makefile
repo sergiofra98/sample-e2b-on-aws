@@ -52,10 +52,12 @@ build-and-upload:
 	@rm -rf .shared/ .db/
 	@cp -r ../shared .shared/
 	@cp -r ../db .db/
+	@cp -r ../../.git .git/
 	@docker buildx install # sets up the buildx as default docker builder (otherwise the command below won't work)
 	@docker build --platform linux/amd64 --tag "$(GCP_REGION)-docker.pkg.dev/$(GCP_PROJECT_ID)/$(IMAGE)" --push --build-arg COMMIT_SHA="$(COMMIT_SHA)" --build-arg EXPECTED_MIGRATION_TIMESTAMP="$(EXPECTED_MIGRATION_TIMESTAMP)" .
 	@rm -rf .shared/
 	@rm -rf .db/
+	@rm -rf .git/
 
 .PHONY: test
 test:
@@ -70,6 +72,7 @@ build-and-upload-aws:
 	@rm -rf .shared/ .db/
 	@cp -r ../shared .shared/
 	@cp -r ../db .db/
+	@cp -r ../../.git .git/
 	@docker buildx install || true # sets up the buildx as default docker builder
 	# Create ECR repository if it doesn't exist
 	@aws ecr describe-repositories --repository-names $(IMAGE) || aws ecr create-repository --repository-name $(IMAGE)
@@ -77,6 +80,7 @@ build-and-upload-aws:
 	@aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 	# Build and push the image
 	@echo "Building for architecture: $(ARCHITECTURE)"
-	@docker build --platform linux/$(ARCHITECTURE) --tag "$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(IMAGE):latest" .
+	@docker build --platform linux/$(ARCHITECTURE) --build-arg COMMIT_SHA="$(COMMIT_SHA)" --tag "$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(IMAGE):latest" .
 	@docker push "$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(IMAGE):latest"
 	@rm -rf .shared/
+	@rm -rf .git/
