@@ -20,10 +20,12 @@ build:
 	$(eval ARCHITECTURE := $(shell grep "^CFNARCHITECTURE=" /opt/config.properties | cut -d= -f2 || echo "amd64"))
 	@rm -rf .shared/
 	@cp -r ../shared .shared/
+	@cp -r ../../.git .git/
 	@echo "Building with Docker workspace module approach for architecture: $(ARCHITECTURE)"
 
 	@docker build --platform linux/$(ARCHITECTURE) --output=bin --build-arg COMMIT_SHA="$(COMMIT_SHA)" .
 	@rm -rf .shared/
+	@rm -rf .git/
 
 .PHONY: build-local
 build-local:
@@ -61,9 +63,14 @@ upload-aws:
 	aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.us-east-1.amazonaws.com
 	# Build and push Docker image
 	$(eval COMMIT_SHA := $(shell git rev-parse --short HEAD))
+	@rm -rf .shared/
+	@cp -r ../shared .shared/
+	@cp -r ../../.git .git/
 	sudo docker buildx install || true # sets up the buildx as default docker builder
 	sudo docker build --platform linux/amd64 --tag "$(AWS_ACCOUNT_ID).dkr.ecr.us-east-1.amazonaws.com/$(IMAGE):latest" --build-arg COMMIT_SHA="$(COMMIT_SHA)" .
 	sudo docker push "$(AWS_ACCOUNT_ID).dkr.ecr.us-east-1.amazonaws.com/$(IMAGE):latest"
+	@rm -rf .shared/
+	@rm -rf .git/
 
 .PHONY: upload
 upload:
