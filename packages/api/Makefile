@@ -2,7 +2,7 @@ IMAGE := e2b-orchestration/api
 
 
 openapi := ../../spec/openapi.yml
-codegen := go tool github.com/oapi-codegen/oapi-codegen/cmd/oapi-codegen
+codegen := go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 
 .PHONY: generate
 generate:
